@@ -1,0 +1,33 @@
+/* ArmorMakeStub 版本资源（ASCII only, see src/common/armor_version.h) */
+#include <windows.h>
+#include "../common/armor_version.h"
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION    ARMOR_APP_VER_MAJOR,ARMOR_APP_VER_MINOR,ARMOR_APP_VER_PATCH,0
+ PRODUCTVERSION ARMOR_APP_VER_MAJOR,ARMOR_APP_VER_MINOR,ARMOR_APP_VER_PATCH,0
+ FILEFLAGSMASK 0x3fL
+ FILEFLAGS 0x0L
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080404b0"
+        BEGIN
+            VALUE "Comments",         "Author: byHandsome"
+            VALUE "CompanyName",      ARMOR_APP_AUTHOR
+            VALUE "FileDescription",  "ARMOR build-time tool - flattens ArmorStub.exe into stub_blob*.h"
+            VALUE "FileVersion",      ARMOR_APP_VERSION
+            VALUE "InternalName",     "ArmorMakeStub"
+            VALUE "LegalCopyright",   ARMOR_APP_COPYRIGHT
+            VALUE "OriginalFilename", "ArmorMakeStub.exe"
+            VALUE "ProductName",      ARMOR_APP_NAME
+            VALUE "ProductVersion",   ARMOR_APP_VERSION
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x804, 1200
+    END
+END

@@ -1,0 +1,164 @@
+﻿============================================================
+        ARMOR 软件保护壳  v2.0.0
+        作者: byHandsome    QQ群: 647765957
+============================================================
+
+【软件简介】
+ARMOR 是针对 Windows PE 可执行程序（易语言静态、火山、VC++、
+C++ 等编译的程序）的压缩 + 保护壳工具，同时支持 x86 (PE32) 与
+x64 (PE32+) 两种架构，可处理 EXE 与 DLL（扩展名不参与判定，
+一律按 PE 格式自动识别）。
+
+加壳后程序体积显著减小（一般可压缩到原体积的 60% 左右），并
+内置以下保护特性：
+  1. 载荷压缩 + RC4 加密
+  2. 反调试（检测到调试器可选退出或行为异常）
+  3. 反转储（anti-dump，防内存 dump）
+  4. 易语言特征隐藏（减小被杀软特征查杀的概率）
+  5. 载荷 CRC 校验（防篡改）
+  6. 保留源程序图标与版本版权信息（资源节不压缩）
+
+本包内 ArmorCLI.exe 同时内嵌 x86 与 x64 两份运行时外壳，
+无论它本身是 32 位还是 64 位，都能给两种架构的目标加壳。
+
+============================================================
+【支持范围】
+  支持:  x86 (PE32) / x64 (PE32+) 的 EXE 与 DLL
+         .com / .scr / 其它扩展名但本身是 x86/x64 PE 的文件
+  不支持: 内核态驱动 (.sys)、.NET 程序、16 位 DOS 程序、
+          ARM/ARM64 PE、ELF / EFI 固件等非 PE 文件
+
+  注意: DLL 加壳需加参数 --allow-dll。
+
+============================================================
+【快速上手 —— 拖放加壳（最简单）】
+把 EXE 或 DLL 直接拖到 ArmorCLI.exe 图标上即可加壳，
+可以一次拖入多个文件。
+
+  - 输出文件: 原文件名_packed.扩展名，与原文件同目录
+    （例: app.exe -> app_packed.exe）
+  - 无需敲命令，x86 / x64、EXE / DLL 自动识别
+  - 每次加壳结果会写入与被处理文件同目录的 ArmorCLI.log
+  - 已加壳的文件会被拒绝（防重复加壳，提示需 --force）
+
+拖放默认参数:
+  压缩级别=6   易语言特征隐藏=auto   载荷加密=开
+  反调试=exit   反转储=开   载荷CRC=开   保留资源节=开(图标/版权不丢)
+
+============================================================
+【命令行用法】
+  基本格式:
+    ArmorCLI.exe pack <输入文件> <输出文件> [选项]
+    ArmorCLI.exe unpack <加壳文件> <还原文件> [选项]
+    ArmorCLI.exe scan <输入文件>           （只查看目标信息，不加壳）
+    ArmorCLI.exe version                   （查看版本）
+    ArmorCLI.exe help                      （查看帮助）
+
+  退出码: 0 成功, 1 参数错误, 2 输入输出错误,
+          3 不支持的目标, 4 处理失败
+
+【常用命令示例】
+  1. 极简加壳（全部默认）:
+       ArmorCLI.exe pack app.exe app_packed.exe
+
+  2. 给易语言程序加壳（推荐，默认已含各项保护与资源保留）:
+       ArmorCLI.exe pack 程序.exe 程序_packed.exe --force
+
+  3. 最高压缩比:
+       ArmorCLI.exe pack app.exe app_packed.exe --level=9
+
+  4. 增强反调试（检测调试窗口/进程名/计时）:
+       ArmorCLI.exe pack app.exe app_packed.exe --anti-debug-level=2
+
+  5. 关闭反调试 / 反转储 / 特征隐藏:
+       ArmorCLI.exe pack app.exe app_packed.exe --anti-debug=none
+       ArmorCLI.exe pack app.exe app_packed.exe --anti-dump=0
+       ArmorCLI.exe pack app.exe app_packed.exe --hide-features=none
+
+  6. 不保留资源节（极致压缩，但图标/版本信息会丢）:
+       ArmorCLI.exe pack app.exe app_packed.exe --keep-rsrc=0
+
+  7. 自定义产物节名前缀（避开默认 .arm0/.armr/.arm1 特征）:
+       ArmorCLI.exe pack app.exe app_packed.exe --section-prefix=shield
+
+  8. DLL 加壳（x86/x64 均可）:
+       ArmorCLI.exe pack my.dll my_packed.dll --allow-dll
+
+  9. 查看目标信息（不加壳）:
+       ArmorCLI.exe scan app.exe
+
+  （提示: ArmorCLI.exe <文件路径> 直接拖入的命令行调用，
+    走的是与拖放相同的代码路径。）
+
+【完整参数表】(pack 命令)
+  --level=N                  压缩级别 1..9，默认 6
+  --encrypt=0|1              载荷 RC4 加密，默认 1
+  --anti-debug=模式          反调试: none=关 / exit=退出 / fake=行为异常，默认 exit
+  --anti-debug-level=1|2     反调试强度，2 增加窗口/进程名/计时检测，默认 1
+  --anti-dump=0|1            还原后混淆 PE 头(反转储)，默认 1
+  --hide-features=模式       易语言特征隐藏: auto|none|all|名称;名称，默认 auto
+  --keep-manifest=0|1        保留清单资源(权限/视觉样式)，默认 1
+  --keep-rsrc=0|1            资源节不压缩(保留图标/版本版权)，默认 1
+  --crc=0|1                  解包前校验载荷 CRC，默认 1
+  --force                    忽略"重复加壳"等告警
+  --allow-dll                允许处理 DLL(导入/导出/重定位表原样保留)
+  --stub=<映像>              使用外部外壳映像(架构须与目标一致)
+  --seed=N                   随机种子，0=自动随机
+  --section-prefix=<前缀>    自定义产物节名前缀(默认 arm，1..6 个字母数字)
+  --unpack                   一键解压还原(等价于独立子命令 unpack)
+  --config=<路径>            从配置文件加载加壳选项(命令行优先)
+  --json                     以 JSON 输出，便于 GUI 解析
+  -q, --quiet                只输出错误
+  --sigfile=<路径>           指定易语言特征文件
+
+============================================================
+【一键解压还原(脱壳)】
+对已加壳产物（EXE/DLL）做解压还原，输出与原始文件逐字节一致。
+三种方式等价，任选其一:
+
+  1. 独立子命令:
+       ArmorCLI.exe unpack app_packed.exe app_restored.exe
+
+  2. pack 加 --unpack 参数:
+       ArmorCLI.exe pack app_packed.exe app_restored.exe --unpack
+
+  3. 配合配置文件（见下）:
+       ArmorCLI.exe pack app_packed.exe app_restored.exe --config=armor.ini
+
+说明: 自定义节名前缀无需记忆，默认按 .arm1 定位，找不到时会
+自动扫描带有效 ARMOR 头的节；还原后与原文件逐字节一致。
+
+============================================================
+【配置文件 armor.ini】
+不想每次敲一长串参数时，可用配置文件。随包可带模板 armor.ini，
+一行一条 key=value:
+
+    ArmorCLI.exe pack app.exe app_packed.exe --config=armor.ini
+
+规则:
+  - 命令行参数优先于配置文件
+  - 配置文件未写的项使用内置默认值
+  - ";" 或 "#" 开头为注释，空行忽略
+  - 配置项名与命令行参数一致(去掉 -- 前缀)，例如:
+      level=9
+      anti-debug=exit
+      anti-debug-level=2
+      keep-rsrc=1
+      section-prefix=shield
+
+============================================================
+【注意事项】
+  1. 请先备份原文件再加壳，确保原程序可正常运行。
+  2. 加壳后的文件被部分杀软误报属于壳类软件的常见现象，
+     可尝试使用 --section-prefix 换节名前缀等降低识别率。
+  3. 小的程序文件因需附加运行时外壳，加壳后体积可能不减反增，
+     属正常现象；对较大的程序通常可压缩到约 60%。
+  4. 已加壳的文件再次加壳会被拒绝，需加 --force 强制（不建议）。
+  5. .NET 程序、驱动 (.sys)、16 位程序等不支持，扫描时会提示。
+  6. 本工具仅用于保护您拥有合法权利的自有软件，请勿用于破解
+     他人软件或恶意用途。
+
+============================================================
+ARMOR 软件保护壳 v2.0.0
+Copyright (c) 2026 byHandsome    QQ群: 647765957
+============================================================
