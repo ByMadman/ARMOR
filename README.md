@@ -1,6 +1,6 @@
 # ARMOR —— x86 / x64 通用的 PE 压缩保护壳
 
-> **作者：byHandsome**　|　`ArmorCLI.exe` 文件属性里的公司名、版权信息，以及 `ArmorCLI version` 的输出，均带有该署名
+> **作者：byHandsome**　|　官网：https://armorv3.7x0.cn/ QQ群：647765957
 >
 > 支持 **x86（32 位）与 x64（64 位）**，支持 **EXE 与 DLL**，默认保留图标与版本版权
 > 与 UPX、VMProtect 怎么选？以及它**做不到**什么
